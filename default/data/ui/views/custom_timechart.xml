@@ -1,0 +1,80 @@
+<dashboard script="autodiscover.js">
+  <label>Custom Timecharts</label>
+  <row>
+    <panel>
+      <html>
+        <h2>Custom Timecharts</h2>
+        <p>Custom Timecharts are using a javascript visualization named Highcharts (<a href="http://www.highcharts.com/">Highcharts.com</a>).
+        <br />They support adding as many x-Axis as needed. This makes it possible to lay data of two different timeranges with the same span over each other <b>without need to shift the timestamp!</b><br />
+        All what you have to do is:
+        <ul>
+          <li>Copy <i>$SPLUNK_HOME/etc/apps/custom_timecharts/appserver/static/autodiscover.js</i> to <i>$SPLUNK_HOME/etc/apps/&lt;your_app&gt;/appserver/static</i></li>
+          <li>Restart splunk web</li>
+          <li>Create a search generating stats with data for two series</li>
+          <li>Add a html panel to your dashboard</li>
+          <li>Add a SearchManager and the HighChartView to the html panel (see the  <a href="/manager/custom_timechart/data/ui/views/custom_timechart?action=edit">source</a> of this dashboard for example code)</li>
+          <li>Adjust the settings <i>seriesField</i> (field name containing the series), <i>valueField</i> (field name containing the data), <i>span</i> (range in seconds between two data points), <i>unitLabel</i> (suffix for data values), <i>valueLabel</i> (data axis label) and <i>type</i> (Chart type, defaults to 'line'. Possible values: line, column, area</li>
+        </ul></p>
+       <p><b>Note:</b> Your browser needs internet access to fetch the Highchart library at http(s)://code.highcharts.com/highcharts</p>
+       <h3>Search examples</h3>
+       <p>
+        Index volume in kb last week vs. the week before:<br/>
+        <span style="font-family: Courier New">index=_internal earliest="-2w@w" latest="@w" source="*metrics.log" group=per_index_thruput 
+| fields kb
+| timechart span=1d sum(kb) AS kb
+| eval marker=strftime(_time, "Week #%U")</span>
+       </p>
+      </html>
+    </panel>
+    <panel>
+      <html>
+          <h2>Example 1: Daily average temperature last week vs. the week before</h2>
+          <div id="example-search1"  
+            class="splunk-manager"
+            data-require="splunkjs/mvc/searchmanager"
+            data-options='{
+              "search": "| inputlookup custom_timechart_testdata"
+            }'>
+          </div>
+          <div class="splunk-view"
+            data-require="app/custom_timechart/highchartview"
+            data-options='{            
+              "managerid": "example-search1",            
+              "seriesField": "marker",             
+              "valueField": "temperature",
+              "span": 86400000,
+              "unitLabel": "°C",
+              "valueLabel": "Temperature",             
+              "height" : 250
+            }'>
+          </div>
+        </html>
+        <html>
+          <h2>Example 2: Daily index volume last week vs. the week before</h2>
+          <div id="example-search2"  
+            class="splunk-manager"
+            data-require="splunkjs/mvc/searchmanager"
+            data-options='{
+              "search": "index=_internal earliest=\"-2w@w\" latest=\"@w\" source=\"*metrics.log\" group=per_index_thruput 
+| fields kb
+| timechart span=1d sum(kb) AS kb
+| eval marker=strftime(_time, \"Week #%U\")"
+            }'>
+          </div>
+          <div class="splunk-view"
+            data-require="app/custom_timechart/highchartview"
+            data-options='{            
+              "managerid": "example-search2",            
+              "seriesField": "marker",             
+              "valueField": "kb",
+              "span": 86400,
+              "unitLabel": "kb",
+              "valueLabel": "Index volume", 
+              "type": "column",            
+              "height" : 250
+            }'>
+          </div>
+        </html>
+    </panel>
+  </row>
+</dashboard>
