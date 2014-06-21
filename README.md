@@ -3,9 +3,11 @@
 
 ## Changelog
 - **2014-06-19** sba - v1.0 released
+- **2014-06-21** sba - v1.1 released
 
 ## Release Notes
 - **v1.0** Initial release
+- **v1.1** Added examples and explanation for token usage
 
 ## Installation 
 Install the app as a normal Splunk app. Copy autodiscover.js from appserver/statc to your app's appserver/static. Restart splunk.

@@ -39,6 +39,7 @@ define(function(require, exports, module) {
         // Override this method to format the data for the view
         formatData: function(data) {
             //console.log("formatData", data);
+            //console.log("formatData");
             highData = {}
 
             var seriesField = this.settings.get('seriesField');
@@ -66,19 +67,57 @@ define(function(require, exports, module) {
         updateView: function(viz, data) {
             // TODO: Display the data in the view
             //console.log("updateView", data);
+            
             this.$el.empty();
 
-            var id = _.uniqueId("amchart");
-            
-            $('<div />').attr('id', id).height(this.settings.get('height')).width(this.settings.get('width')).appendTo(this.$el);    
+            var containerId = _.uniqueId("highchart");
+            //console.log("id", containerId);
 
+            //debugger;
+            
+            $('<div />').clone().attr('id', containerId).height(this.settings.get('height')).width(this.settings.get('width')).appendTo(this.$el);    
+
+            // Span adjustements    
+            var spanLabels = {}; 
+
+            if(this.settings.get('span') <= 3600) {
+                spanLabels = {
+                    day: '%H:%M',
+                    hour: '%H:%M'
+                };             
+            } else if(this.settings.get('span') <= 86400) {
+                spanLabels = {
+                    day: '%A'
+                };
+            } else if(this.settings.get('span') <= 604800) {
+                spanLabels = {
+                    day: '%H:%M',
+                    hour: '%H:%M'
+                };                
+            } else {
+                spanLabels = {
+                    millisecond: '%H:%M:%S.%L',
+                    second: '%H:%M:%S',
+                    minute: '%H:%M',
+                    hour: '%H:%M',
+                    day: '%e. %b',
+                    week: '%e. %b',
+                    month: '%b \'%y',
+                    year: '%Y'
+                };
+            }
+            //debugger;
+
+            // Global Highchart settings
             Highcharts.setOptions({
                 global: {
                     useUTC: false
                 }
             });
-            $('#' + id).highcharts({
+            
+            chartOptions = {
                 chart: {
+                    renderTo: containerId,
                     zoomType: 'xy',
                     height: this.settings.get('height')
                 },
@@ -100,9 +139,7 @@ define(function(require, exports, module) {
                     type: 'datetime',
                     tickInterval: this.settings.get('span') * 1000,
                     tickmarkPlacement: 'on',
-                    dateTimeLabelFormats: { // don't display the dummy year
-                        day: '%A'
-                    }
+                    dateTimeLabelFormats: spanLabels
                 }, {
                     type: 'datetime',
                     lineWidth: 0,
@@ -144,7 +181,9 @@ define(function(require, exports, module) {
                         valueSuffix: this.settings.get('unitLabel')
                     }
                 }]
-            }); // End HighChart
+            } // End chartOption
+
+            splunkHighChart = new Highcharts.Chart(chartOptions);
                 
         } // End updateView
     }); // End HighChartView

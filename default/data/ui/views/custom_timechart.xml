@@ -1,4 +1,4 @@
-<dashboard script="autodiscover.js">
+<form script="autodiscover.js">
   <label>Custom Timecharts</label>
   <row>
     <panel>
@@ -15,7 +15,12 @@
           <li>Add a SearchManager and the HighChartView to the html panel (see the  <a href="/manager/custom_timechart/data/ui/views/custom_timechart?action=edit">source</a> of this dashboard for example code)</li>
           <li>Adjust the settings <i>seriesField</i> (field name containing the series), <i>valueField</i> (field name containing the data), <i>span</i> (range in seconds between two data points), <i>unitLabel</i> (suffix for data values), <i>valueLabel</i> (data axis label) and <i>type</i> (Chart type, defaults to 'line'. Possible values: line, column, area</li>
         </ul></p>
-       <p><b>Note:</b> Your browser needs internet access to fetch the Highchart library at http(s)://code.highcharts.com/highcharts</p>
+       <p><b>Important:</b>
+       <ul>
+          <li>Your browser needs internet access to fetch the Highchart library at http(s)://code.highcharts.com/highcharts</li>
+          <li>If you want to use tokens in the search, or for the options unitLabel and valueLabel, be sure to escape them. So $token$ has to be $$token$$. Also you need to put the options in the form like: <span style="font-family: Courier New">"valueLabel": {"type": "token_safe", "value": "Index volume for $$index$$" } </span>  </li>
+        </ul>
+       </p>
        <h3>Search examples</h3>
        <p>
         Index volume in kb last week vs. the week before:<br/>
@@ -26,6 +31,8 @@
        </p>
       </html>
     </panel>
+  </row>
+  <row>
     <panel>
       <html>
           <h2>Example 1: Daily average temperature last week vs. the week before</h2>
@@ -33,32 +40,40 @@
             class="splunk-manager"
             data-require="splunkjs/mvc/searchmanager"
             data-options='{
-              "search": "| inputlookup custom_timechart_testdata"
+              "search": {"type": "token_safe", "value": "| inputlookup custom_timechart_testdata"}
             }'>
           </div>
           <div class="splunk-view"
             data-require="app/custom_timechart/highchartview"
-            data-options='{            
-              "managerid": "example-search1",            
+            data-options='{        
+              "managerid": "example-search1",                      
               "seriesField": "marker",             
               "valueField": "temperature",
-              "span": 86400000,
+              "span": 86400,
               "unitLabel": "°C",
               "valueLabel": "Temperature",             
               "height" : 250
             }'>
           </div>
         </html>
+      </panel>
+      <panel>
+        <input type="dropdown" token="index" searchWhenChanged="true">
+          <label>Index:</label>
+          <default>*</default>
+          <choice value="*">All</choice>
+          <populatingSearch fieldForLabel="index" fieldForValue="index">| eventcount summarize=false index=* index=_* | dedup index | fields index</populatingSearch>
+        </input>
         <html>
           <h2>Example 2: Daily index volume last week vs. the week before</h2>
           <div id="example-search2"  
             class="splunk-manager"
             data-require="splunkjs/mvc/searchmanager"
             data-options='{
-              "search": "index=_internal earliest=\"-2w@w\" latest=\"@w\" source=\"*metrics.log\" group=per_index_thruput 
+              "search": {"type": "token_safe", "value": "index=_internal earliest=\"-2w@w\" latest=\"@w\" source=\"*metrics.log\" group=per_index_thruput series=\"$$index$$\"
 | fields kb
 | timechart span=1d sum(kb) AS kb
-| eval marker=strftime(_time, \"Week #%U\")"
+| eval marker=strftime(_time, \"Week #%U\")" }
             }'>
           </div>
           <div class="splunk-view"
@@ -69,7 +84,7 @@
               "valueField": "kb",
               "span": 86400,
               "unitLabel": "kb",
-              "valueLabel": "Index volume", 
+              "valueLabel": {"type": "token_safe", "value": "Index volume for $$index$$" }, 
               "type": "column",            
               "height" : 250
             }'>
@@ -77,4 +92,4 @@
         </html>
     </panel>
   </row>
-</dashboard>
+</form>
