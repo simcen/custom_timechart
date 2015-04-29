@@ -2,6 +2,7 @@
 - Author: Simon Balz <simon@balz.me>
 
 ## Changelog
+- **2015-04-29** sba - Updated examples according latest SimpleXML changes
 - **2014-06-19** sba - v1.0 released
 - **2014-06-21** sba - v1.1 released
 
@@ -10,7 +11,7 @@
 - **v1.1** Added examples and explanation for token usage
 
 ## Installation 
-Install the app as a normal Splunk app. Copy autodiscover.js from appserver/statc to your app's appserver/static. Restart splunk.
+Install the app as a normal Splunk app. Copy autodiscover.js from appserver/static to your app's appserver/static. Restart splunk.
 
 ## general Information
 - Example dashboard is included 

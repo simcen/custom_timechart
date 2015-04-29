@@ -3,7 +3,6 @@
   <row>
     <panel>
       <html>
-        <h2>Custom Timecharts</h2>
         <p>Custom Timecharts are using a javascript visualization named Highcharts (<a href="http://www.highcharts.com/">Highcharts.com</a>).
         <br />They support adding as many x-Axis as needed. This makes it possible to lay data of two different timeranges with the same span over each other <b>without need to shift the timestamp!</b><br />
         All what you have to do is:
@@ -18,7 +17,7 @@
        <p><b>Important:</b>
        <ul>
           <li>Your browser needs internet access to fetch the Highchart library at http(s)://code.highcharts.com/highcharts</li>
-          <li>If you want to use tokens in the search, or for the options unitLabel and valueLabel, be sure to escape them. So $token$ has to be $$token$$. Also you need to put the options in the form like: <span style="font-family: Courier New">"valueLabel": {"type": "token_safe", "value": "Index volume for $$index$$" } </span>  </li>
+          <li>If you want to use tokens in the search, or for the options unitLabel and valueLabel, be sure to escape them. So $token$ has to be &#36;&#36;token&#36;&#36;. Also you need to put the options in the form like: <span style="font-family: Courier New">"valueLabel": {"type": "token_safe", "value": "Index volume for &#36;&#36;index&#36;&#36;" } </span>  </li>
         </ul>
        </p>
        <h3>Search examples</h3>
@@ -34,30 +33,34 @@
   </row>
   <row>
     <panel>
+      <title>Example 1: Daily average temperature last week vs. the week before</title>
+      <search id="examplesearch1">
+        <query>| inputlookup custom_timechart_testdata</query>
+        <earliest>0</earliest>
+        <latest>now</latest>
+      </search>
       <html>
-          <h2>Example 1: Daily average temperature last week vs. the week before</h2>
-          <div id="example-search1"  
-            class="splunk-manager"
-            data-require="splunkjs/mvc/searchmanager"
-            data-options='{
-              "search": {"type": "token_safe", "value": "| inputlookup custom_timechart_testdata"}
-            }'>
-          </div>
-          <div class="splunk-view"
-            data-require="app/custom_timechart/highchartview"
-            data-options='{        
-              "managerid": "example-search1",                      
-              "seriesField": "marker",             
-              "valueField": "temperature",
-              "span": 86400,
-              "unitLabel": "°C",
-              "valueLabel": "Temperature",             
-              "height" : 250
-            }'>
-          </div>
+        <div class="splunk-view"
+          data-require="app/custom_timechart/highchartview"
+          data-options='{        
+            "managerid": "examplesearch1",                      
+            "seriesField": "marker",             
+            "valueField": "temperature",
+            "span": 86400,
+            "unitLabel": "°C",
+            "valueLabel": "Temperature",             
+            "height" : 250
+          }'>
+        </div>
         </html>
       </panel>
       <panel>
+        <title>Example 2: Daily index volume last week vs. the week before</title>
+        <search id="examplesearch2">
+          <query>index=_internal source="*metrics.log" group=per_index_thruput series="$index$" | fields kb | timechart span=1d sum(kb) AS kb | eval marker=strftime(_time, "Week #%U")</query>
+          <earliest>-2w@w</earliest>
+          <latest>@w</latest>
+        </search>
         <input type="dropdown" token="index" searchWhenChanged="true">
           <label>Index:</label>
           <default>*</default>
@@ -65,21 +68,10 @@
           <populatingSearch fieldForLabel="index" fieldForValue="index">| eventcount summarize=false index=* index=_* | dedup index | fields index</populatingSearch>
         </input>
         <html>
-          <h2>Example 2: Daily index volume last week vs. the week before</h2>
-          <div id="example-search2"  
-            class="splunk-manager"
-            data-require="splunkjs/mvc/searchmanager"
-            data-options='{
-              "search": {"type": "token_safe", "value": "index=_internal earliest=\"-2w@w\" latest=\"@w\" source=\"*metrics.log\" group=per_index_thruput series=\"$$index$$\"
-| fields kb
-| timechart span=1d sum(kb) AS kb
-| eval marker=strftime(_time, \"Week #%U\")" }
-            }'>
-          </div>
           <div class="splunk-view"
             data-require="app/custom_timechart/highchartview"
             data-options='{            
-              "managerid": "example-search2",            
+              "managerid": "examplesearch2",            
               "seriesField": "marker",             
               "valueField": "kb",
               "span": 86400,
